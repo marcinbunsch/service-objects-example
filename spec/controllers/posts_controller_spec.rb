@@ -18,17 +18,22 @@ require 'rails_helper'
 # Message expectations are only used when there is no simpler way to specify
 # that an instance is receiving a specific message.
 
-RSpec.describe PostsController, :type => :controller do
+describe PostsController do
 
   # This should return the minimal set of attributes required to create a valid
   # Post. As you add validations to Post, be sure to
   # adjust the attributes here as well.
-  let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
-  }
+  let(:title) { "My post" }
+  let(:body) { "Read me" }
+  let(:valid_attributes) do
+    {
+      :title => title,
+      :body => body
+    }
+  end
 
   let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
+    { :title => nil }
   }
 
   # This should return the minimal set of values that should be in the session
@@ -68,23 +73,41 @@ RSpec.describe PostsController, :type => :controller do
   end
 
   describe "POST create" do
+
+    let(:twitter) { double("TwitterClient") }
+    let(:search) { double("SearchClient") }
+    let(:last_post) { Post.last }
+    before do
+      allow(TwitterClient).to receive_messages(:new => twitter)
+      allow(SearchClient).to receive_messages(:new => search)
+      allow(twitter).to receive_messages(:tweet => nil)
+      allow(search).to receive_messages(:index => nil)
+    end
+
     describe "with valid params" do
-      it "creates a new Post" do
+      it "creates a new Post with appropriate attributes" do
         expect {
           post :create, {:post => valid_attributes}, valid_session
         }.to change(Post, :count).by(1)
-      end
-
-      it "assigns a newly created post as @post" do
-        post :create, {:post => valid_attributes}, valid_session
-        expect(assigns(:post)).to be_a(Post)
-        expect(assigns(:post)).to be_persisted
+        expect(last_post.title).to eq(title)
+        expect(last_post.body).to eq(body)
       end
 
       it "redirects to the created post" do
         post :create, {:post => valid_attributes}, valid_session
         expect(response).to redirect_to(Post.last)
       end
+
+      it "tweets the Post" do
+        expect(twitter).to receive(:tweet).with("Blogged: #{title}")
+        post :create, {:post => valid_attributes}, valid_session
+      end
+
+      it "indexes the Post" do
+        expect(search).to receive(:index)
+        post :create, {:post => valid_attributes}, valid_session
+      end
+
     end
 
     describe "with invalid params" do
@@ -102,15 +125,18 @@ RSpec.describe PostsController, :type => :controller do
 
   describe "PUT update" do
     describe "with valid params" do
+      let(:updated_title) { "Updated title" }
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        {
+          :title => updated_title
+        }
       }
 
       it "updates the requested post" do
         post = Post.create! valid_attributes
         put :update, {:id => post.to_param, :post => new_attributes}, valid_session
         post.reload
-        skip("Add assertions for updated state")
+        expect(post.title).to eq(updated_title)
       end
 
       it "assigns the requested post as @post" do

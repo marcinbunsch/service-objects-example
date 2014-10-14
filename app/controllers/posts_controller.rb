@@ -24,6 +24,12 @@ class PostsController < ApplicationController
     @post = Post.new(post_params)
 
     if @post.save
+      twitter = TwitterClient.new(current_user)
+      twitter.tweet "Blogged: #{@post.title}"
+
+      search = SearchClient.new
+      search.index @post
+
       redirect_to @post, notice: 'Post was successfully created.'
     else
       render :new

@@ -28,3 +28,6 @@ module ServiceObjectsExample
     # config.i18n.default_locale = :de
   end
 end
+
+require "./lib/fake_clients"
+require "./lib/user"
