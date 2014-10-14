@@ -74,43 +74,24 @@ describe PostsController do
 
   describe "POST create" do
 
-    let(:twitter) { double("TwitterClient") }
-    let(:search) { double("SearchClient") }
-    let(:last_post) { Post.last }
+    let(:created_post) { Post.new }
     before do
-      allow(TwitterClient).to receive_messages(:new => twitter)
-      allow(SearchClient).to receive_messages(:new => search)
-      allow(twitter).to receive_messages(:tweet => nil)
-      allow(search).to receive_messages(:index => nil)
+      allow(PostCreator).to receive_messages(:create => created_post)
     end
 
     describe "with valid params" do
-      it "creates a new Post with appropriate attributes" do
-        expect {
-          post :create, {:post => valid_attributes}, valid_session
-        }.to change(Post, :count).by(1)
-        expect(last_post.title).to eq(title)
-        expect(last_post.body).to eq(body)
-      end
 
       it "redirects to the created post" do
         post :create, {:post => valid_attributes}, valid_session
         expect(response).to redirect_to(Post.last)
       end
 
-      it "tweets the Post" do
-        expect(twitter).to receive(:tweet).with("Blogged: #{title}")
-        post :create, {:post => valid_attributes}, valid_session
-      end
-
-      it "indexes the Post" do
-        expect(search).to receive(:index)
-        post :create, {:post => valid_attributes}, valid_session
-      end
-
     end
 
     describe "with invalid params" do
+      before do
+        created_post.errors.add(:title, 'is missing')
+      end
       it "assigns a newly created but unsaved post as @post" do
         post :create, {:post => invalid_attributes}, valid_session
         expect(assigns(:post)).to be_a_new(Post)
