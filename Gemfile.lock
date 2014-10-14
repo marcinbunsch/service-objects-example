@@ -39,6 +39,7 @@ GEM
     json (1.8.1)
     mail (2.6.1)
       mime-types (>= 1.16, < 3)
+    method_struct (0.0.5)
     mime-types (2.4.1)
     minitest (5.4.2)
     multi_json (1.10.1)
@@ -103,6 +104,7 @@ PLATFORMS
 
 DEPENDENCIES
   jquery-rails
+  method_struct
   rails (= 4.1.6)
   rspec-rails (~> 3.0.0)
   sdoc (~> 0.4.0)

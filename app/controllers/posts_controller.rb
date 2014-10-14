@@ -21,15 +21,9 @@ class PostsController < ApplicationController
 
   # POST /posts
   def create
-    @post = Post.new(post_params)
+    @post = PostCreator.create(current_user, post_params)
 
-    if @post.save
-      twitter = TwitterClient.new(current_user)
-      twitter.tweet "Blogged: #{@post.title}"
-
-      search = SearchClient.new
-      search.index @post
-
+    if @post.errors.none?
       redirect_to @post, notice: 'Post was successfully created.'
     else
       render :new
