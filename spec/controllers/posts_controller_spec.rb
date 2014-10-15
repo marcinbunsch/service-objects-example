@@ -74,21 +74,22 @@ describe PostsController do
 
   describe "POST create" do
 
-    let(:created_post) { Post.new }
     before do
       allow(PostCreator).to receive_messages(:create => created_post)
     end
 
     describe "with valid params" do
+      let(:created_post) { Post.create(valid_attributes) }
 
       it "redirects to the created post" do
         post :create, {:post => valid_attributes}, valid_session
-        expect(response).to redirect_to(Post.last)
+        expect(response).to redirect_to(created_post)
       end
 
     end
 
     describe "with invalid params" do
+      let(:created_post) { Post.new }
       before do
         created_post.errors.add(:title, 'is missing')
       end
